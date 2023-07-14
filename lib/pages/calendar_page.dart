@@ -1,3 +1,4 @@
+import 'package:calendar_app/pages/note_page.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -9,8 +10,15 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
+  late TextEditingController _datePickerController;
   CalendarFormat format = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _datePickerController = TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,40 +28,86 @@ class _CalendarPageState extends State<CalendarPage> {
         title: const Text('Month'),
         centerTitle: true,
       ),
-      body: TableCalendar(
-        focusedDay: _selectedDay,
-        calendarFormat: format,
-        firstDay: DateTime(1989),
-        lastDay: DateTime(2050),
-        startingDayOfWeek: StartingDayOfWeek.monday,
-        daysOfWeekVisible: true,
-        onDaySelected: (DateTime selectDay, _) {
-          setState(() {
-            _selectedDay = selectDay;
-          });
+      body: Column(
+        children: [
+          TableCalendar(
+            focusedDay: _selectedDay,
+            calendarFormat: format,
+            firstDay: DateTime(1989),
+            lastDay: DateTime(2050),
+            startingDayOfWeek: StartingDayOfWeek.monday,
+            daysOfWeekVisible: true,
+            onDaySelected: (DateTime selectDay, _) {
+              setState(() {
+                _selectedDay = selectDay;
+                _datePickerController.text =
+                    selectDay.toString().substring(0, 10);
+              });
+            },
+            selectedDayPredicate: (DateTime date) {
+              return isSameDay(_selectedDay, date);
+            },
+            calendarStyle: CalendarStyle(
+              weekendTextStyle: TextStyle(
+                  fontSize: 15,
+                  color: Colors.indigo[900],
+                  fontWeight: FontWeight.w500),
+              isTodayHighlighted: true,
+              todayDecoration: BoxDecoration(
+                color: Colors.blueGrey[600],
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: const BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              selectedTextStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+            ),
+            daysOfWeekStyle: DaysOfWeekStyle(
+              weekdayStyle: TextStyle(
+                fontSize: 15,
+                color: Colors.green[700],
+              ),
+              weekendStyle: TextStyle(
+                fontSize: 15,
+                color: Colors.indigo[900],
+              ),
+            ),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(color: Colors.grey),
+              child: ListTile(
+                title: _datePickerController.text.isEmpty
+                    ? const Text('')
+                    : const Text('Select day:'),
+                subtitle: Text(_datePickerController.text),
+              ),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          String dateTransfer = _datePickerController.text;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NotePage(
+                dateReception: dateTransfer,
+                dateUpdateReception: '',
+              ),
+            ),
+          );
         },
-        selectedDayPredicate: (DateTime date) {
-          return isSameDay(_selectedDay, date);
-        },
-        calendarStyle: CalendarStyle(
-          isTodayHighlighted: true,
-          todayDecoration: BoxDecoration(
-            color: Colors.blueGrey[600],
-            shape: BoxShape.circle,
-          ),
-          selectedDecoration: const BoxDecoration(
-            color: Colors.blue,
-            shape: BoxShape.circle,
-          ),
-          selectedTextStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
-        headerStyle: const HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-        ),
+        child: const Icon(Icons.add),
       ),
     );
   }
