@@ -13,6 +13,7 @@ class _CalendarPageState extends State<CalendarPage> {
   late TextEditingController _datePickerController;
   CalendarFormat format = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
+  bool _dayChangeMode = false;
 
   @override
   void initState() {
@@ -28,6 +29,44 @@ class _CalendarPageState extends State<CalendarPage> {
         title: const Text('Month'),
         centerTitle: true,
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Settings',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              subtitle: const Text('Select the start day of the week'),
+              title: Row(
+                children: [
+                  _dayChangeMode
+                      ? const Text('Select start day (SUNDAY)')
+                      : const Text('Select start day (MONDAY)'),
+                  const Spacer(),
+                  Switch(
+                    value: _dayChangeMode,
+                    onChanged: (value) {
+                      setState(() {
+                        _dayChangeMode = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           TableCalendar(
@@ -35,7 +74,9 @@ class _CalendarPageState extends State<CalendarPage> {
             calendarFormat: format,
             firstDay: DateTime(1989),
             lastDay: DateTime(2050),
-            startingDayOfWeek: StartingDayOfWeek.monday,
+            startingDayOfWeek: _dayChangeMode
+                ? StartingDayOfWeek.sunday
+                : StartingDayOfWeek.monday,
             daysOfWeekVisible: true,
             onDaySelected: (DateTime selectDay, _) {
               setState(() {

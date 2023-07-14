@@ -1,5 +1,4 @@
 import 'package:calendar_app/pages/calendar_page.dart';
-//import 'package:calendar_app/pages/note_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
