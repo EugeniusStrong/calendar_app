@@ -34,7 +34,7 @@ class DBProvider {
   /// В нее необходимо передать путь, созданный ранее. Указать версию. Передать функцию для для создания таблиц.
   Future<Database?> _initDB() async {
     Directory dir = await getApplicationDocumentsDirectory();
-    String path = '${dir.path}/NewCalendarWithNotes.db';
+    String path = '${dir.path}/NotesWithCalendar.db';
     return await openDatabase(
       path,
       version: 1,
@@ -94,8 +94,8 @@ class DBProvider {
   ///  если запись с таким идентификатором уже существует, она будет заменена новой записью,
   ///  что позволяет, как выполнить сохранение новой записи, так и обновить уже имеющуюся,
   ///  с помощью более компактного кода.
-  Future<void> insertOrUpdate(
-      String id, String description, DateTime remainingDate) async {
+  Future<void> insertOrUpdate(String id, String description,
+      DateTime remainingDate) async {
     final model = NoteModel(id, description, remainingDate);
     Database? db = await database;
     await db!.insert(notesTable, model.toMap(),

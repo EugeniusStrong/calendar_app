@@ -3,7 +3,11 @@ class NoteModel {
   final String description;
   final DateTime remainingDate;
 
-  NoteModel(this.id, this.description, this.remainingDate);
+  NoteModel(
+    this.id,
+    this.description,
+    this.remainingDate,
+  );
 
   /// Преобразование полей класса в формат ключ-значение.
   Map<String, dynamic> toMap() {
@@ -14,23 +18,23 @@ class NoteModel {
     };
   }
 
-  ///Извлечение данных из базы данных.
+  /// Извлечение данных из базы данных.
   ///
   /// Фабричный конструктор, который позволяет создать экземпляр класса
   /// NoteModel на основе данных из Map.
   factory NoteModel.fromMap(Map<String, dynamic> map) {
     return NoteModel(
       map['id'],
-      map['note'],
+      map['description'],
       DateTime.parse(
         map['remainingDate'],
       ),
     );
   }
 
-  ///Копирование с изменением.
+  /// Копирование с изменением.
   ///
-  ///copyWith() создает и возвращает новый экземпляр NoteModel с возможностью изменения
+  /// copyWith() создает и возвращает новый экземпляр NoteModel с возможностью изменения
   /// значений description и remainingDate. Применяется для создания копии
   /// объекта с изменением только некоторых полей, оставив остальные значения без изменений.
   NoteModel copyWith({String? description, DateTime? remainingDate}) {
