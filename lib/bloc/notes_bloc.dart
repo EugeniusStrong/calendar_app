@@ -43,8 +43,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   /// для обновления пользовательского интерфейса с новым списком заметок.
   Future<void> _saveNote(String description, DateTime remainingDate,
       Emitter<NotesState> emit) async {
-    final id = _uuid.v4();
-    await db.insertOrUpdate(input?.id ?? id, description, remainingDate);
+    final id = input?.id ?? _uuid.v4();
+    await db.insertOrUpdate(id, description, remainingDate);
     final notesList = await db.getNotes();
     emit(NotesLoadSuccess(todoList: notesList));
   }

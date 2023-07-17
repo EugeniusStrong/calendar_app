@@ -50,7 +50,7 @@ class DBProvider {
     await db.execute('CREATE TABLE $notesTable'
         '($columnId TEXT PRIMARY KEY,'
         ' $columnDescription TEXT,'
-        ' $columnRemainingDate TEXT,');
+        ' $columnRemainingDate TEXT)');
   }
 
   /// Получение списка заметок(объектов NoteModel) из базы данных.
@@ -94,8 +94,8 @@ class DBProvider {
   ///  если запись с таким идентификатором уже существует, она будет заменена новой записью,
   ///  что позволяет, как выполнить сохранение новой записи, так и обновить уже имеющуюся,
   ///  с помощью более компактного кода.
-  Future<void> insertOrUpdate(String id, String description,
-      DateTime remainingDate) async {
+  Future<void> insertOrUpdate(
+      String id, String description, DateTime remainingDate) async {
     final model = NoteModel(id, description, remainingDate);
     Database? db = await database;
     await db!.insert(notesTable, model.toMap(),

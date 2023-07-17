@@ -1,3 +1,4 @@
+import 'package:calendar_app/bloc/notes_event.dart';
 import 'package:calendar_app/pages/calendar_page.dart';
 import 'package:calendar_app/sql_directory/database.dart';
 import 'package:calendar_app/sql_directory/note_model.dart';
@@ -7,7 +8,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/notes_bloc.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    BlocProvider<NotesBloc>(
+      create: (context) =>
+          NotesBloc(DBProvider.db, NoteModel('', '', DateTime.now()))
+            ..add(NotesAppStarted()),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,12 +23,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: BlocProvider<NotesBloc>(
-        create: (context) =>
-            NotesBloc(DBProvider.db, NoteModel('', '', DateTime.now())),
-        child: const CalendarPage(),
-      ),
+    return const MaterialApp(
+      home: CalendarPage(),
     );
   }
 }

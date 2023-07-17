@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
 import '../bloc/notes_bloc.dart';
+import '../bloc/notes_event.dart';
 import '../bloc/notes_state.dart';
 
 class CalendarPage extends StatefulWidget {
@@ -18,7 +19,6 @@ class _CalendarPageState extends State<CalendarPage> {
   CalendarFormat format = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
   bool _dayChangeMode = false;
-  final List _testTodoList = List.generate(10, (index) => 'Item ${index + 1}');
   late DateFormat dateFormat;
   late DateTime currentMonth;
   late DateFormat dayOfWeekFormat;
@@ -47,61 +47,111 @@ class _CalendarPageState extends State<CalendarPage> {
       drawer: buildDrawer(),
       body: BlocBuilder<NotesBloc, NotesState>(
         builder: (context, state) {
-          return Column(
-            children: [
-              buildCalendar(),
-              Container(
-                decoration: const BoxDecoration(color: Colors.blue),
-                child: ListTile(
-                  leading: Text(_selectedDay.day.toString(),
+          if (state is NotesLoadSuccess) {
+            if (state.todoList.isEmpty) {
+              return Column(
+                children: [
+                  buildCalendar(),
+                  Container(
+                    decoration: const BoxDecoration(color: Colors.blue),
+                    child: ListTile(
+                      leading: Text(_selectedDay.day.toString(),
+                          style: const TextStyle(
+                            fontSize: 43,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w500,
+                          )),
+                      title: Text(monthName),
+                      subtitle: Text(dayOfWeekName),
+                    ),
+                  ),
+                  const Expanded(
+                    child: Center(
+                      child: Icon(
+                        Icons.create,
+                        size: 100,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'To add a note press +',
+                      style: TextStyle(fontSize: 30),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return Column(
+              children: [
+                buildCalendar(),
+                Container(
+                  decoration: const BoxDecoration(color: Colors.blue),
+                  child: ListTile(
+                    leading: Text(
+                      _selectedDay.day.toString(),
                       style: const TextStyle(
                         fontSize: 43,
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w500,
-                      )),
-                  title: Text(monthName),
-                  subtitle: Text(dayOfWeekName),
+                      ),
+                    ),
+                    title: Text(monthName),
+                    subtitle: Text(dayOfWeekName),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _testTodoList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Dismissible(
-                      key: Key(_testTodoList[index]),
-                      child: Card(
-                        color: Colors.blue[300],
-                        child: ListTile(
-                          leading: const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '14',
-                                style: TextStyle(
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: state.todoList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final itemData = state.todoList[index];
+                      return Dismissible(
+                        key: Key(itemData.id.toString()),
+                        child: Card(
+                          color: Colors.blue[300],
+                          child: ListTile(
+                            leading: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  itemData.remainingDate
+                                      .toString()
+                                      .substring(0, 10),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                              ],
+                            ),
+                            title: TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                itemData.description,
+                                style: const TextStyle(
                                     color: Colors.white, fontSize: 25),
                               ),
-                              Text(
-                                'JULY',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                          title: TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              'Your note here',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 25),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_sweep_outlined,
+                                  color: Colors.black54),
+                              onPressed: () {
+                                _onDelete(context, itemData.id);
+                              },
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                        onDismissed: (direction) {
+                          _onDelete(context, itemData.id);
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          );
+              ],
+            );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -214,5 +264,9 @@ class _CalendarPageState extends State<CalendarPage> {
         ],
       ),
     );
+  }
+
+  void _onDelete(BuildContext context, String id) {
+    BlocProvider.of<NotesBloc>(context).add(NotesDeleteRequested(id));
   }
 }
