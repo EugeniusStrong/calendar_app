@@ -32,6 +32,12 @@ class _NotePageState extends State<NotePage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _noteController;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final monthName = dateFormat.format(currentMonth);
     final dayOfWeekName = dayOfWeekFormat.format(currentDay);
@@ -46,12 +52,9 @@ class _NotePageState extends State<NotePage> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  '${currentDay.day.toString()} $monthName $dayOfWeekName',
-                  style: const TextStyle(fontSize: 30),
-                ),
+              Text(
+                '${currentDay.day} $monthName $dayOfWeekName',
+                style: const TextStyle(fontSize: 30),
               ),
               const SizedBox(
                 height: 16,

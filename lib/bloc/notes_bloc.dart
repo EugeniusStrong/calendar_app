@@ -41,10 +41,11 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   /// После этого получается список всех заметок из базы данных с помощью метода getNotes.
   /// Далее, с помощью функции emit эмитируется событие NotesLoadSuccess
   /// для обновления пользовательского интерфейса с новым списком заметок.
-  Future<void> _saveNote(String description, DateTime remainingDate,
+  Future<void> _saveNote(String? description, DateTime remainingDate,
       Emitter<NotesState> emit) async {
     final id = input?.id ?? _uuid.v4();
-    await db.insertOrUpdate(id, description, remainingDate);
+    await db.insertOrUpdate(
+        id: id, description: description, remainingDate: remainingDate);
     final notesList = await db.getNotes();
     emit(NotesLoadSuccess(todoList: notesList));
   }

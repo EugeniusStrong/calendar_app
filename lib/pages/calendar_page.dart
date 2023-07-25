@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-
 import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
 import '../bloc/notes_state.dart';
@@ -18,7 +17,8 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   CalendarFormat format = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
-  bool _dayChangeMode = false;
+  final DateTime _dateTime = DateTime.now();
+  late bool _dayChangeMode;
   late DateFormat dateFormat;
   late DateTime currentMonth;
   late DateFormat dayOfWeekFormat;
@@ -29,9 +29,9 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
     _dayChangeMode = false;
     dateFormat = DateFormat('MMMM');
-    currentMonth = DateTime.now();
+    currentMonth = _dateTime;
     dayOfWeekFormat = DateFormat('EEEE');
-    currentDay = DateTime.now();
+    currentDay = _dateTime;
   }
 
   @override
@@ -65,9 +65,22 @@ class _CalendarPageState extends State<CalendarPage> {
                       subtitle: Text(dayOfWeekName),
                     ),
                   ),
-                  const Expanded(
-                    child: Center(
-                      child: Icon(
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  Expanded(
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NotePage(
+                              dateFromCalendarPage: _selectedDay,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(
                         Icons.create,
                         size: 100,
                         color: Colors.black54,
@@ -107,41 +120,36 @@ class _CalendarPageState extends State<CalendarPage> {
                     itemBuilder: (BuildContext context, int index) {
                       final itemData = state.todoList[index];
                       return Dismissible(
-                        key: Key(itemData.id.toString()),
+                        key: Key(itemData.id!),
                         child: Card(
                           color: Colors.blue[300],
                           child: ListTile(
-                            leading: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  itemData.remainingDate
-                                      .toString()
-                                      .substring(0, 10),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 20),
-                                ),
-                              ],
+                            leading: Text(
+                              itemData.remainingDate
+                                  .toString()
+                                  .substring(0, 10),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 20),
                             ),
-                            title: TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                itemData.description,
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 25),
+                            title: Text(
+                              itemData.description!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
                               ),
                             ),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_sweep_outlined,
                                   color: Colors.black54),
                               onPressed: () {
-                                _onDelete(context, itemData.id);
+                                _onDelete(context, itemData.id!);
                               },
                             ),
                           ),
                         ),
                         onDismissed: (direction) {
-                          _onDelete(context, itemData.id);
+                          _onDelete(context, itemData.id!);
                         },
                       );
                     },
@@ -253,9 +261,11 @@ class _CalendarPageState extends State<CalendarPage> {
                 Switch(
                   value: _dayChangeMode,
                   onChanged: (value) {
-                    setState(() {
-                      _dayChangeMode = value;
-                    });
+                    setState(
+                      () {
+                        _dayChangeMode = value;
+                      },
+                    );
                   },
                 ),
               ],

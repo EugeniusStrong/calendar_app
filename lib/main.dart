@@ -11,7 +11,7 @@ void main() {
   runApp(
     BlocProvider<NotesBloc>(
       create: (context) =>
-          NotesBloc(DBProvider.db, NoteModel('', '', DateTime.now()))
+          NotesBloc(DBProvider.db, NoteModel(remainingDate: DateTime.now()))
             ..add(NotesAppStarted()),
       child: const MyApp(),
     ),

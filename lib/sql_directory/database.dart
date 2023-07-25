@@ -95,8 +95,11 @@ class DBProvider {
   ///  что позволяет, как выполнить сохранение новой записи, так и обновить уже имеющуюся,
   ///  с помощью более компактного кода.
   Future<void> insertOrUpdate(
-      String id, String description, DateTime remainingDate) async {
-    final model = NoteModel(id, description, remainingDate);
+      {String? id,
+      String? description,
+      required DateTime remainingDate}) async {
+    final model = NoteModel(
+        id: id, description: description, remainingDate: remainingDate);
     Database? db = await database;
     await db!.insert(notesTable, model.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
