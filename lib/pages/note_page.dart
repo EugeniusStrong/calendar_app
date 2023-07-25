@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
 import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
+import '../sql_directory/note_model.dart';
 
 class NotePage extends StatefulWidget {
-  final DateTime dateFromCalendarPage;
+  final NoteModel? noteModel;
 
-  const NotePage({Key? key, required this.dateFromCalendarPage})
-      : super(key: key);
+  const NotePage({Key? key, this.noteModel}) : super(key: key);
 
   @override
   State<NotePage> createState() => _NotePageState();
@@ -20,15 +21,17 @@ class _NotePageState extends State<NotePage> {
   late DateTime currentMonth;
   late DateFormat dayOfWeekFormat;
   late DateTime currentDay;
+  static const _uuid = Uuid();
 
   @override
   void initState() {
     super.initState();
     dateFormat = DateFormat('MMMM');
-    currentMonth = widget.dateFromCalendarPage;
+    currentMonth = widget.noteModel!.remainingDate;
     dayOfWeekFormat = DateFormat('EEEE');
-    currentDay = widget.dateFromCalendarPage;
-    _noteController = TextEditingController();
+    currentDay = widget.noteModel!.remainingDate;
+    _noteController =
+        TextEditingController(text: widget.noteModel!.description);
   }
 
   @override
@@ -41,6 +44,7 @@ class _NotePageState extends State<NotePage> {
   Widget build(BuildContext context) {
     final monthName = dateFormat.format(currentMonth);
     final dayOfWeekName = dayOfWeekFormat.format(currentDay);
+
     return BlocProvider<NotesBloc>(
       create: (context) => BlocProvider.of<NotesBloc>(context),
       child: Scaffold(
@@ -79,10 +83,12 @@ class _NotePageState extends State<NotePage> {
               ),
               ElevatedButton(
                 onPressed: () {
+                  final id = widget.noteModel?.id ?? _uuid.v4();
                   final notesBloc = BlocProvider.of<NotesBloc>(context);
                   notesBloc.add(
                     NotesSaveRequested(
-                      remainingDate: widget.dateFromCalendarPage,
+                      id: id,
+                      remainingDate: widget.noteModel!.remainingDate,
                       description: _noteController.text,
                     ),
                   );

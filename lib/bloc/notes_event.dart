@@ -11,13 +11,17 @@ class NotesAppStarted extends NotesEvent {
 }
 
 class NotesSaveRequested extends NotesEvent {
+  final String id;
   final String description;
   final DateTime remainingDate;
 
-  NotesSaveRequested({required this.remainingDate, required this.description});
+  NotesSaveRequested(
+      {required this.id,
+      required this.remainingDate,
+      required this.description});
 
   @override
-  List<Object?> get props => [description, remainingDate];
+  List<Object?> get props => [id, description, remainingDate];
 }
 
 class NotesDeleteRequested extends NotesEvent {

@@ -1,22 +1,18 @@
-import 'package:calendar_app/sql_directory/note_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 import '../sql_directory/database.dart';
 import 'notes_event.dart';
 import 'notes_state.dart';
 
 class NotesBloc extends Bloc<NotesEvent, NotesState> {
-  static const _uuid = Uuid();
   final DBProvider db;
-  final NoteModel? input;
 
-  NotesBloc(this.db, this.input) : super(NoteInitial()) {
+  NotesBloc(this.db) : super(NoteInitial()) {
     on<NotesDeleteRequested>((event, emit) async {
       await _deleteNote(event.id, emit);
     });
     on<NotesSaveRequested>((event, emit) async {
-      await _saveNote(event.description, event.remainingDate, emit);
+      await _saveNote(event.id, event.description, event.remainingDate, emit);
     });
     on<NotesAppStarted>((event, emit) async {
       await _loadData(emit);
@@ -41,9 +37,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   /// После этого получается список всех заметок из базы данных с помощью метода getNotes.
   /// Далее, с помощью функции emit эмитируется событие NotesLoadSuccess
   /// для обновления пользовательского интерфейса с новым списком заметок.
-  Future<void> _saveNote(String? description, DateTime remainingDate,
-      Emitter<NotesState> emit) async {
-    final id = input?.id ?? _uuid.v4();
+  Future<void> _saveNote(String? id, String? description,
+      DateTime remainingDate, Emitter<NotesState> emit) async {
     await db.insertOrUpdate(
         id: id, description: description, remainingDate: remainingDate);
     final notesList = await db.getNotes();

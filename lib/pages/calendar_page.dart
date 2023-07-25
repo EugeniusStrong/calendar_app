@@ -1,4 +1,3 @@
-import 'package:calendar_app/pages/note_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -6,9 +5,13 @@ import 'package:intl/intl.dart';
 import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
 import '../bloc/notes_state.dart';
+import '../sql_directory/note_model.dart';
+import 'note_page.dart';
 
 class CalendarPage extends StatefulWidget {
-  const CalendarPage({Key? key}) : super(key: key);
+  final NoteModel? noteModel;
+
+  const CalendarPage({Key? key, this.noteModel}) : super(key: key);
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
@@ -23,6 +26,8 @@ class _CalendarPageState extends State<CalendarPage> {
   late DateTime currentMonth;
   late DateFormat dayOfWeekFormat;
   late DateTime currentDay;
+
+  Map<DateTime, List<NoteModel>> events = {};
 
   @override
   void initState() {
@@ -48,6 +53,14 @@ class _CalendarPageState extends State<CalendarPage> {
       body: BlocBuilder<NotesBloc, NotesState>(
         builder: (context, state) {
           if (state is NotesLoadSuccess) {
+            events.clear();
+            for (var note in state.todoList) {
+              final date = note.remainingDate;
+              if (events[date] == null) {
+                events[date] = [];
+              }
+              events[date]!.add(note);
+            }
             if (state.todoList.isEmpty) {
               return Column(
                 children: [
@@ -55,12 +68,14 @@ class _CalendarPageState extends State<CalendarPage> {
                   Container(
                     decoration: const BoxDecoration(color: Colors.blue),
                     child: ListTile(
-                      leading: Text(_selectedDay.day.toString(),
-                          style: const TextStyle(
-                            fontSize: 43,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.w500,
-                          )),
+                      leading: Text(
+                        _selectedDay.day.toString(),
+                        style: const TextStyle(
+                          fontSize: 43,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       title: Text(monthName),
                       subtitle: Text(dayOfWeekName),
                     ),
@@ -75,8 +90,8 @@ class _CalendarPageState extends State<CalendarPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => NotePage(
-                              dateFromCalendarPage: _selectedDay,
-                            ),
+                                noteModel:
+                                    NoteModel(remainingDate: _selectedDay)),
                           ),
                         );
                       },
@@ -87,76 +102,91 @@ class _CalendarPageState extends State<CalendarPage> {
                       ),
                     ),
                   ),
-                  const Expanded(
-                    child: Text(
-                      'To add a note press +',
-                      style: TextStyle(fontSize: 30),
+                  Container(
+                    height: 200,
+                    child: const Center(
+                      child: Text(
+                        'To add a note press +',
+                        style: TextStyle(fontSize: 30),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            } else {
+              return Column(
+                children: [
+                  buildCalendar(),
+                  Container(
+                    decoration: const BoxDecoration(color: Colors.blue),
+                    child: ListTile(
+                      leading: Text(
+                        _selectedDay.day.toString(),
+                        style: const TextStyle(
+                          fontSize: 43,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      title: Text(monthName),
+                      subtitle: Text(dayOfWeekName),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: state.todoList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final itemData = state.todoList[index];
+                        return Dismissible(
+                          key: Key(itemData.id!),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      NotePage(noteModel: itemData),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              color: Colors.blue[300],
+                              child: ListTile(
+                                leading: Text(
+                                  itemData.remainingDate
+                                      .toString()
+                                      .substring(0, 10),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                title: Text(
+                                  itemData.description!,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 25,
+                                  ),
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete_sweep_outlined,
+                                      color: Colors.black54),
+                                  onPressed: () {
+                                    _onDelete(context, itemData.id!);
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          onDismissed: (direction) {
+                            _onDelete(context, itemData.id!);
+                          },
+                        );
+                      },
                     ),
                   ),
                 ],
               );
             }
-            return Column(
-              children: [
-                buildCalendar(),
-                Container(
-                  decoration: const BoxDecoration(color: Colors.blue),
-                  child: ListTile(
-                    leading: Text(
-                      _selectedDay.day.toString(),
-                      style: const TextStyle(
-                        fontSize: 43,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    title: Text(monthName),
-                    subtitle: Text(dayOfWeekName),
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: state.todoList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final itemData = state.todoList[index];
-                      return Dismissible(
-                        key: Key(itemData.id!),
-                        child: Card(
-                          color: Colors.blue[300],
-                          child: ListTile(
-                            leading: Text(
-                              itemData.remainingDate
-                                  .toString()
-                                  .substring(0, 10),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 20),
-                            ),
-                            title: Text(
-                              itemData.description!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 25,
-                              ),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_sweep_outlined,
-                                  color: Colors.black54),
-                              onPressed: () {
-                                _onDelete(context, itemData.id!);
-                              },
-                            ),
-                          ),
-                        ),
-                        onDismissed: (direction) {
-                          _onDelete(context, itemData.id!);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
           } else {
             return const Center(child: CircularProgressIndicator());
           }
@@ -167,9 +197,8 @@ class _CalendarPageState extends State<CalendarPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => NotePage(
-                dateFromCalendarPage: _selectedDay,
-              ),
+              builder: (context) =>
+                  NotePage(noteModel: NoteModel(remainingDate: _selectedDay)),
             ),
           );
         },
@@ -194,14 +223,18 @@ class _CalendarPageState extends State<CalendarPage> {
           currentMonth = selectedDay;
         });
       },
+      eventLoader: (day) {
+        return _getEventsForDay(day);
+      },
       selectedDayPredicate: (DateTime date) {
         return isSameDay(_selectedDay, date);
       },
       calendarStyle: CalendarStyle(
         weekendTextStyle: TextStyle(
-            fontSize: 15,
-            color: Colors.indigo[900],
-            fontWeight: FontWeight.w500),
+          fontSize: 15,
+          color: Colors.indigo[900],
+          fontWeight: FontWeight.w500,
+        ),
         isTodayHighlighted: true,
         todayDecoration: BoxDecoration(
           color: Colors.blueGrey[600],
@@ -278,5 +311,9 @@ class _CalendarPageState extends State<CalendarPage> {
 
   void _onDelete(BuildContext context, String id) {
     BlocProvider.of<NotesBloc>(context).add(NotesDeleteRequested(id));
+  }
+
+  List<NoteModel> _getEventsForDay(DateTime day) {
+    return events[day] ?? [];
   }
 }
