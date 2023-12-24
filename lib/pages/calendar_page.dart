@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
 import '../bloc/notes_state.dart';
+import '../notifi/notifi.dart';
 import '../sql_directory/note_model.dart';
 import 'note_page.dart';
 
@@ -48,6 +49,14 @@ class _CalendarPageState extends State<CalendarPage> {
       appBar: AppBar(
         title: const Text('Month'),
         centerTitle: true,
+        actions: [
+          IconButton(
+              onPressed: () {
+                NotificationService().showNotification(
+                    title: 'Warning!', body: 'You create note', id: 1);
+              },
+              icon: const Icon(Icons.message))
+        ],
       ),
       drawer: buildDrawer(),
       body: BlocBuilder<NotesBloc, NotesState>(
@@ -62,56 +71,39 @@ class _CalendarPageState extends State<CalendarPage> {
               events[date]!.add(note);
             }
             if (state.todoList.isEmpty) {
-              return Column(
-                children: [
-                  buildCalendar(),
-                  Container(
-                    decoration: const BoxDecoration(color: Colors.blue),
-                    child: ListTile(
-                      leading: Text(
-                        _selectedDay.day.toString(),
-                        style: const TextStyle(
-                          fontSize: 43,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.w500,
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    buildCalendar(),
+                    Container(
+                      decoration: const BoxDecoration(color: Colors.blue),
+                      child: ListTile(
+                        leading: Text(
+                          _selectedDay.day.toString(),
+                          style: const TextStyle(
+                            fontSize: 43,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        title: Text(monthName),
+                        subtitle: Text(dayOfWeekName),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    const SizedBox(
+                      height: 200,
+                      child: Center(
+                        child: Text(
+                          'To add a note press " + "',
+                          style: TextStyle(fontSize: 30),
                         ),
                       ),
-                      title: Text(monthName),
-                      subtitle: Text(dayOfWeekName),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NotePage(
-                                noteModel:
-                                    NoteModel(remainingDate: _selectedDay)),
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.create,
-                        size: 100,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    child: const Center(
-                      child: Text(
-                        'To add a note press +',
-                        style: TextStyle(fontSize: 30),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               );
             } else {
               return Column(
@@ -150,14 +142,25 @@ class _CalendarPageState extends State<CalendarPage> {
                               );
                             },
                             child: Card(
-                              color: Colors.blue[300],
+                              color: Colors.blue,
                               child: ListTile(
-                                leading: Text(
-                                  itemData.remainingDate
-                                      .toString()
-                                      .substring(0, 10),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 20),
+                                leading: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      itemData.remainingDate
+                                          .toString()
+                                          .substring(0, 10),
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 20),
+                                    ),
+                                  ),
                                 ),
                                 title: Text(
                                   itemData.description!,
@@ -169,7 +172,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                 ),
                                 trailing: IconButton(
                                   icon: const Icon(Icons.delete_sweep_outlined,
-                                      color: Colors.black54),
+                                      color: Colors.white),
                                   onPressed: () {
                                     _onDelete(context, itemData.id!);
                                   },

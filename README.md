@@ -1,16 +1,13 @@
 # calendar_app
 
-A new Flutter project.
+# Описание проекта
 
-## Getting Started
+**Проект самой простой записной книжки с календарем, который создавался с целью закрепления знаний пакета BloC и пакета SQL, фрэймворк Flutter.**
 
-This project is a starting point for a Flutter application.
+|            Главное меню             |            Создание записи             |
+|:-----------------------------------:|:--------------------------------------:|
+| ![](./preview_images/main_menu.png) | ![](./preview_images/created_note.png) |
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+|               Созданные записи                |           Настройка начала недели           |
+|:---------------------------------------------:|:-------------------------------------------:|
+| ![](./preview_images/calendar_with_event.png) | ![](./preview_images/setting_start_day.png) | 

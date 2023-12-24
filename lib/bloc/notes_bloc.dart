@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../sql_directory/database.dart';
 import 'notes_event.dart';
 import 'notes_state.dart';
